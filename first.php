@@ -29,7 +29,12 @@ $str = 'pelo';
 </head>
 <body>
     <h1>one talk bBs</h1>
-
+    <h2>
+        abc <br>
+        <?php
+            echo $str;
+        ?>
+    </h2>
     <form action="bbs.php" method="post">
         name: <input type="text" name="name" /><br />
         one talk: <input type="text" name="comment" size="60" /><br />
