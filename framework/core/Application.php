@@ -37,6 +37,29 @@ abstract class Application
     public function run()
     {
         $params = $this->router->resolve($this->request->getPathInfo());
+        if($params === false)
+        {
+
+        }
+
+        $controller = $params['controller'];
+        $action = $params['action'];
+
+        $this->runAction($controller, $action, $params);
+
+    }
+
+    public function runAction($controller_name, $acton, $params = array())
+    {
+        // $controller_name の一番最初の文字を大文字にする
+        $controller_class = ucfirst($controller_name). 'Controller';
+
+
+    }
+
+    protected function findController($controller_class)
+    {
+        
     }
 
     abstract public function getRootDir();
