@@ -6,6 +6,7 @@ $password = '0819Tobita';
 
 $addr = $_SERVER["REMOTE_ADDR"];
 echo 'addr='.$addr.'<br />'."\n";
+$addr_server = $_SERVER[""];
 $str = 'pelo';
 try
 {
