@@ -9,12 +9,14 @@ abstract class Application
     protected $request;
     protected $response;
     protected $session;
-    
+    protected $db_manager;
+
     public function __construct($is_debug = false)
     {
         $this->is_debug = $is_debug;
         $this->setDebugMode($is_debug);
         $this->initialize();
+        $this->configure();
     }
 
     protected function setDebugMode($is_debug)
@@ -39,6 +41,7 @@ abstract class Application
         $this->request = new Request();
         $this->response = new Response();
         $this->session = new Session();
+        $this->db_manager = new DbManager();
 
         $this->log();
     }
@@ -137,6 +140,11 @@ abstract class Application
         return $this->session;
     }
 
+    public function getDBManager()
+    {
+        return $this->db_manager;
+    }
+
     public function getControllerDir()
     {
         return $this->getRootDir() . '/controllers';
@@ -149,6 +157,7 @@ abstract class Application
 
     public function getModelDir()
     {
+        return $this->getRootDir() . '/models';
 
     }
 

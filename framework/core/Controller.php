@@ -8,6 +8,7 @@ abstract class Controller
     protected $request;
     protected $response;
     protected $session;
+    protected $db_manager;
 
     public function __construct($application)
     {
@@ -21,7 +22,7 @@ abstract class Controller
         $this->request = $application->getRequest();
         $this->response = $application->getResponse();
         $this->session = $application->getSession();
-        
+        $this->db_manager = $application->getDBManager();
     }
 
     public function run($action, $params = array())
@@ -93,6 +94,22 @@ abstract class Controller
     {
         throw new HttpNotFoundException('Forwarded 404 page from '
                 . $this->controller_name. '/' . $this->action_name);   
+    }
+
+    protected function redirect($url)
+    {
+        $pattern = '#https?://#';
+        if(!preg_match($pattern, $url))
+        {
+            $protocol = $this->request->isSsl() ? 'https://' : 'http://';
+            $host = $this->request->getHost();
+            $base_url = $this->request->getBaseUrl();
+
+            $url = $protocol . $host . $base_url . $url;
+        }
+
+        $this->response->setStatusCode(302, 'Found');
+        $this->response->setHttpHeader('Location', $url);
     }
 
 }

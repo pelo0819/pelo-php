@@ -4,23 +4,10 @@
 
 <form action="<?php echo $base_url; ?>/account/register" method="post">
     <input type="hidden" name ="_token" value="<?php echo $this->escape($_token) ?>" />
-
-    <table>
-        <tbody>
-            <tr>
-                <th>user id</th>
-                <td>
-                    <input type="text" name="user_name" value="" />
-                </td>
-            </tr>
-            <tr>
-                <th>password</th>
-                <td>
-                    <input type="password" name="password" value="" />
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    <?php if(isset($errors) && count($errors) > 0): ?>
+    <?php $this->render('errors', array('errors' => $errors)); ?>
+    <?php endif; ?>
+    <?php $this->render('account/input', array('user_name'=> $user_name, 'password'=> $password)); ?>
     <p>
         <input type="submit" value="register" />
     </p>
