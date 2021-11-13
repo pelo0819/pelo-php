@@ -1,8 +1,8 @@
 # コマンドライン引数のデフォルト値をセット
 Param(
     [String]$Arg1 = "false", # imageをbuildするか
-    [String]$Arg2 = "pelo:2.0", # image名
-    [String]$Arg3 = "pelo01" # container名
+    [String]$Arg2 = "packet:1.0", # image名
+    [String]$Arg3 = "packet01" # container名
 )
 
 $host_name = "pelo"
@@ -20,7 +20,7 @@ if($Arg1 -eq "true")
     docker build -t $Arg2 .
 }
 
-$mount_folder_name = "laravel1_0_disk"
+$mount_folder_name = "ubuntu_disk"
 $mount_folder_dir = "C:\" + $mount_folder_name
 if(test-path $mount_folder_dir)
 {
@@ -36,12 +36,8 @@ docker container run `
  -it `
  -h $host_name `
  --name $container_name `
- -p 80:80 `
+ --privileged `
+ -p 10080:80 `
  -p 10306:3306 `
- --mount type=bind,src=/C/$mount_folder_name/app,dst=/var/www/canvas/app `
- --mount type=bind,src=/C/$mount_folder_name/routes,dst=/var/www/canvas/routes `
- --mount type=bind,src=/C/$mount_folder_name/resources,dst=/var/www/canvas/resources `
- --mount type=bind,src=/C/$mount_folder_name/database,dst=/var/www/canvas/database `
- --mount type=bind,src=/C/$mount_folder_name/public,dst=/var/www/canvas/public `
- --mount type=bind,src=/C/$mount_folder_name/config,dst=/var/www/canvas/config `
- $image_name
+ --mount type=bind,src=/C/Users/tobita/docus/peloLinux,dst=/root/windows_disk `
+ $image_name /bin/bash

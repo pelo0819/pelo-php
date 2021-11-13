@@ -26,11 +26,10 @@ RUN apt install -y curl php-cli php-mbstring git unzip
 
 RUN php -r "copy ( 'https://getcomposer.org/installer', 'composer-setup.php' ) ;";
 RUN php composer-setup.php --install-dir=/usr/local/bin --filename=composer;
-# 上手く行かないかも
+# 上手く行かないかも(上手くいかないなら、起動後、もう一回たたく)
 RUN composer create-project laravel/laravel --prefer-dist /var/www/canvas
-# 上手く行かないかも
 RUN sed -i 's/html/canvas\/public/' /etc/apache2/sites-available/000-default.conf
-# 上手く行かないかも
+# 上手く行かないかも(上手くいかないなら、起動後、もう一回たたく)
 RUN chmod -R 777 /var/www/canvas
 
 COPY launch.sh /root/
