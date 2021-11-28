@@ -22,4 +22,8 @@ COPY init_mysql.sql /root/
 EXPOSE 80
 EXPOSE 3306
 
+RUN ls /root
+RUN chmod +x /root/launch.sh
+
+
 ENTRYPOINT [ "/root/launch.sh" ]

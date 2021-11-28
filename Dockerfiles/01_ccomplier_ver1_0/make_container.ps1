@@ -20,8 +20,8 @@ if($Arg1 -eq "true")
     docker build -t $Arg2 .
 }
 
-$mount_folder_name = "ubuntu_disk"
-$mount_folder_dir = "C:\" + $mount_folder_name
+$mount_folder_name = "lowlevel"
+$mount_folder_dir = "C:\docker_files\" + $mount_folder_name
 if(test-path $mount_folder_dir)
 {
     $str = $mount_folder_dir +  ' is already exits. so do not make directory newly.'
@@ -36,7 +36,7 @@ docker container run `
  -it `
  -h $host_name `
  --name $container_name `
- -p 10080:80 `
+ -p 80:80 `
  -p 10306:3306 `
- --mount type=bind,src=/C/Users/tobita/docker_mount,dst=/root/windows_disk `
+ --mount type=bind,src=$mount_folder_dir,dst=/root/windows_disk `
  $image_name /bin/bash
