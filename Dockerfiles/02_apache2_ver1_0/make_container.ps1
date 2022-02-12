@@ -1,8 +1,8 @@
 # コマンドライン引数のデフォルト値をセット
 Param(
     [String]$Arg1 = "false", # imageをbuildするか
-    [String]$Arg2 = "assembly:1.0", # image名
-    [String]$Arg3 = "assembly01" # container名
+    [String]$Arg2 = "apache:1.0", # image名
+    [String]$Arg3 = "apache01" # container名
 )
 
 $host_name = "pelo"
@@ -20,8 +20,8 @@ if($Arg1 -eq "true")
     docker build -t $Arg2 .
 }
 
-$mount_folder_name = "ubuntu_disk"
-$mount_folder_dir = "C:\" + $mount_folder_name
+$mount_folder_name = "apache1_0_disk"
+$mount_folder_dir = "C:\docker_files\" + $mount_folder_name
 if(test-path $mount_folder_dir)
 {
     $str = $mount_folder_dir +  ' is already exits. so do not make directory newly.'
@@ -36,7 +36,6 @@ docker container run `
  -it `
  -h $host_name `
  --name $container_name `
- -p 10080:80 `
- -p 10306:3306 `
- --mount type=bind,src=/C/Users/tobita/docker_mount,dst=/root/windows_disk `
+ -p 80:80 `
+ --mount type=bind,src=$mount_folder_dir,dst=/root/windows_disk `
  $image_name /bin/bash

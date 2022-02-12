@@ -2,7 +2,7 @@
 Param(
     [String]$Arg1 = "false", # imageをbuildするか
     [String]$Arg2 = "tcpserver:1.0", # image名
-    [String]$Arg3 = "tcpserver" # container名
+    [String]$Arg3 = "tcpserver2" # container名
 )
 
 $host_name = "pelo"
@@ -38,6 +38,7 @@ docker container run `
  --name $container_name `
  --privileged `
  -p 80:80 `
+ -p 8080:8080 `
  -p 10306:3306 `
  --mount type=bind,src=$mount_folder_dir,dst=/root/windows_disk `
  $image_name /bin/bash

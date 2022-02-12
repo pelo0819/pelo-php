@@ -1,0 +1,151 @@
+#!/bin/bash
+#
+# tomcat     This shell script takes care of starting and stopping Tomcat
+#
+# chkconfig: - 80 20
+#
+### BEGIN INIT INFO
+# Provides: tomcat
+# Required-Start: $network $syslog
+# Required-Stop: $network $syslog
+# Default-Start:
+# Default-Stop:
+# Short-Description: start, stop, restart, status, clean tomcat
+### END INIT INFO
+
+PROGRAM=$(basename $0)
+TOMCAT_USER=root
+TOMCAT_HOME="/opt/tomcat"
+SHUTDOWN_WAIT=20
+EXCEPT_WARS=()
+
+tomcat_pid() {
+    echo `ps aux | grep org.apache.catalina.startup.Bootstrap | grep -v grep | awk '{ print $2 }'`
+}
+
+start() {
+    pid=$(tomcat_pid)
+    if [ -n "$pid" ]
+    then
+        echo "Tomcat is already running (pid: $pid)"
+    else
+        # Start tomcat
+        echo "Starting tomcat"
+        #/bin/su - -c "cd $TOMCAT_HOME/bin && $TOMCAT_HOME/bin/startup.sh" $TOMCAT_USER
+        ${TOMCAT_HOME}/bin/startup.sh
+    fi
+    return 0
+}
+
+stop() {
+    pid=$(tomcat_pid)
+    if [ -n "$pid" ]
+    then
+        echo "Stopping Tomcat"
+        #/bin/su - -c "cd $TOMCAT_HOME/bin && $TOMCAT_HOME/bin/shutdown.sh" $TOMCAT_USER
+        ${TOMCAT_HOME}/bin/shutdown.sh
+
+    let kwait=$SHUTDOWN_WAIT
+    count=0
+    count_by=5
+    until [ `ps -p $pid | grep -c $pid` = '0' ] || [ $count -gt $kwait ]
+    do
+        echo "Waiting for processes to exit. Timeout before we kill the pid: ${count}/${kwait}"
+        sleep $count_by
+        let count=$count+$count_by;
+    done
+
+    if [ $count -gt $kwait ]; then
+        echo "Killing processes which didn't stop after $SHUTDOWN_WAIT seconds"
+        kill -9 $pid
+    fi
+    else
+        echo "Tomcat is not running"
+    fi
+
+    return 0
+}
+
+clean() {
+    local restart_flag=0
+    pid=$(tomcat_pid)
+    if [ -n "$pid" ]; then
+        stop
+        restart_flag=1
+    fi
+
+    echo "Cleaning webapps..."
+    PWD=$(pwd)
+    cd ${TOMCAT_HOME}/webapps
+    if [[ $? -ne 0 ]]; then
+        echo "webapp directory is not found. : ${TOMCAT_HOME}/webapps"
+        exit 1
+    fi
+    if [[ ${#EXCEPT_WARS[@]} -le 0 ]]; then
+        ls -1 *.war | gawk -F "." '{ print $1; }' | xargs -I@ bash -c "rm -rf @ && rm -f @.war"
+    else
+        local excludes=$(IFS="|" && echo "${EXCEPT_WARS[*]}")
+        echo "Excludes: ${excludes}"
+        ls -1 *.war | grep -vEi "${excludes}" | gawk -F "." '{ print $1; }' | xargs -I@ bash -c "rm -rf @ && rm -f @.war"
+    fi
+    sleep 1
+    ls -l
+    cd ${PWD}
+
+    if [[ restart_flag -gt 0 ]]; then
+        start
+    fi
+}
+
+usage() {
+    echo "${PROGRAM} (start|stop|restart|status|clean (-all|-e excludeWar,...))"
+    echo "Ex) ${PROGRAM} start"
+    echo "Ex) ${PROGRAM} clean -e sample,remain"
+    exit 1
+}
+case $1 in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    clean)
+        if [[ $2 == '-e' ]]; then
+            EXCEPT_WARS=(${3//,/ })
+            if [[ ${#EXCEPT_WARS[@]} -le 0 ]]; then
+                echo "Excluded wars are not set, terminated."
+                exit 1
+            fi
+            echo "Excluded wars: ${EXCEPT_WARS[@]}"
+        elif [[ $2 == '-all' ]]; then
+            echo "Clean all flag detected. Delete all wars."
+        elif [[ -z $2 ]]; then
+            echo "Clean flag is not set. Please set a flag -all or -e (excludeWar,...)."
+            exit 1
+        else
+            echo "Unknown flag, terminated.: ${2}"
+            usage
+        fi
+        clean
+        ;;
+    status)
+        pid=$(tomcat_pid)
+        if [ -n "$pid" ]
+        then
+           echo "Tomcat is running with pid: $pid"
+        else
+           echo "Tomcat is not running"
+        fi
+        ls -l ${TOMCAT_HOME}/webapps
+        ;;
+    *)
+        usage
+        ;;
+esac
+
+exit 0
